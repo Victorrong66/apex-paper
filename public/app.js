@@ -516,6 +516,32 @@ function setSide(side){
   updateOrderSummary();
 }
 
+/* ---------------- Learn modal ---------------- */
+function initLearnModal(){
+  const overlay = document.getElementById("learnOverlay");
+  const open = () => overlay.classList.add("open");
+  const close = () => overlay.classList.remove("open");
+
+  document.getElementById("learnBtn").onclick = open;
+  document.getElementById("learnClose").onclick = close;
+  overlay.addEventListener("click", (e)=>{ if(e.target === overlay) close(); });
+  document.addEventListener("keydown", (e)=>{ if(e.key === "Escape") close(); });
+
+  document.querySelectorAll(".modal-tab").forEach(tab=>{
+    tab.onclick = ()=>{
+      document.querySelectorAll(".modal-tab").forEach(t=>t.classList.remove("active"));
+      document.querySelectorAll(".modal-tab-content").forEach(c=>c.classList.remove("active"));
+      tab.classList.add("active");
+      document.querySelector(`.modal-tab-content[data-learn-content="${tab.dataset.learnTab}"]`).classList.add("active");
+    };
+  });
+
+  if(!localStorage.getItem("apexPaperTrader_seenTutorial")){
+    open();
+    localStorage.setItem("apexPaperTrader_seenTutorial", "1");
+  }
+}
+
 /* ---------------- Reset ---------------- */
 function initReset(){
   document.getElementById("resetBtn").onclick = ()=>{
@@ -539,6 +565,7 @@ async function boot(){
   initTabs();
   initOrderTicket();
   initReset();
+  initLearnModal();
   renderPositions();
   renderOrders();
   renderHistory();

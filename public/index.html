@@ -30,6 +30,7 @@
         <span class="dot" id="connDot"></span>
         <span id="connLabel">Connecting…</span>
       </div>
+      <button class="btn btn-ghost" id="learnBtn">Learn</button>
       <button class="btn btn-ghost" id="resetBtn" title="Reset paper account">Reset Account</button>
     </div>
   </header>
@@ -147,12 +148,14 @@
         </div>
 
         <div class="field" id="limitPriceField" style="display:none">
-          <label>Limit Price (USDT)</label>
+          <label>Limit Price (USD)</label>
           <input type="number" id="limitPriceInput" placeholder="0.00" step="0.01">
         </div>
 
         <div class="field">
-          <label>Margin to Commit (USDT)</label>
+          <label>Margin to Commit (USD)
+            <span class="info-dot" data-tip="This is your own cash you're putting on the line — not the position's full value. It's held as collateral and returned to you (plus/minus PnL) when you close.">i</span>
+          </label>
           <input type="number" id="marginInput" placeholder="100" step="1" value="100">
           <div class="quick-pct">
             <button data-pct="0.1">10%</button>
@@ -163,14 +166,21 @@
         </div>
 
         <div class="field">
-          <label>Leverage <span id="leverageValue">10x</span></label>
+          <label>Leverage <span id="leverageValue">10x</span>
+            <span class="info-dot" data-tip="Multiplies your margin into a bigger position. 10x on $100 margin controls $1,000 of exposure — gains AND losses are 10x bigger. Higher leverage = liquidation price much closer to your entry.">i</span>
+          </label>
           <input type="range" id="leverageSlider" min="1" max="50" value="10" step="1">
         </div>
 
         <div class="order-summary">
           <div class="summary-row"><label>Position Size</label><span id="summarySize" class="mono">—</span></div>
           <div class="summary-row"><label>Est. Entry Price</label><span id="summaryEntry" class="mono">—</span></div>
-          <div class="summary-row"><label>Est. Liquidation Price</label><span id="summaryLiq" class="mono">—</span></div>
+          <div class="summary-row">
+            <label>Est. Liquidation Price
+              <span class="info-dot" data-tip="The price where you lose your entire margin and the position auto-closes. Cross this and the trade is over — no partial loss, the whole margin is gone.">i</span>
+            </label>
+            <span id="summaryLiq" class="mono">—</span>
+          </div>
           <div class="summary-row"><label>Required Margin</label><span id="summaryMargin" class="mono">—</span></div>
         </div>
 
@@ -180,6 +190,91 @@
 
     </aside>
   </main>
+</div>
+
+<!-- LEARN MODAL -->
+<div class="modal-overlay" id="learnOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Learn Futures Trading</h2>
+      <button class="modal-close" id="learnClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs" id="learnTabs">
+        <button class="modal-tab active" data-learn-tab="basics">1. What Are Futures?</button>
+        <button class="modal-tab" data-learn-tab="longshort">2. Long vs Short</button>
+        <button class="modal-tab" data-learn-tab="leverage">3. Leverage &amp; Margin</button>
+        <button class="modal-tab" data-learn-tab="liquidation">4. Liquidation</button>
+        <button class="modal-tab" data-learn-tab="orders">5. Order Types</button>
+        <button class="modal-tab" data-learn-tab="quickstart">6. Quick Start</button>
+      </div>
+
+      <div class="modal-tab-content active" data-learn-content="basics">
+        <h3>What is a futures contract?</h3>
+        <p>A futures contract is an agreement to buy or sell an asset at a set price, settled continuously rather than on a fixed delivery date. The <strong>perpetual futures</strong> this app simulates (BTC/USD, ETH/USD, etc.) never expire — you hold the position for as long as you want, and its value tracks the live market price.</p>
+        <p>The key difference from just buying the asset outright: futures let you trade with <strong>leverage</strong> (control more than your cash covers) and go <strong>short</strong> (profit when price falls) just as easily as going long.</p>
+        <h3>Why traders use futures instead of spot</h3>
+        <ul>
+          <li><strong>Leverage</strong> — put up less capital to control a larger position.</li>
+          <li><strong>Shorting</strong> — profit from a price decline without borrowing the asset first.</li>
+          <li><strong>Hedging</strong> — offset risk on an existing position elsewhere.</li>
+        </ul>
+        <p class="callout">The tradeoff: leverage amplifies losses exactly as much as gains, and futures can liquidate you — wipe out your margin entirely — in a way spot holding never can. That mechanic is covered in sections 3 and 4.</p>
+      </div>
+
+      <div class="modal-tab-content" data-learn-content="longshort">
+        <h3>Long — betting the price goes up</h3>
+        <p>You open a <strong>Long</strong> when you think the price will rise. You profit the difference between your entry price and the current mark price, multiplied by your position size.</p>
+        <p class="formula">Long PnL = (Mark Price − Entry Price) × Position Size</p>
+        <h3>Short — betting the price goes down</h3>
+        <p>You open a <strong>Short</strong> when you think the price will fall. The math flips — you profit when price moves below your entry.</p>
+        <p class="formula">Short PnL = (Entry Price − Mark Price) × Position Size</p>
+        <p class="callout">In this app: the <strong>Long</strong> / <strong>Short</strong> toggle on the order ticket sets this before you submit. Watch the "Unrealized PnL" column in the Positions tab update live as the mark price moves.</p>
+      </div>
+
+      <div class="modal-tab-content" data-learn-content="leverage">
+        <h3>Margin: the cash you actually risk</h3>
+        <p>Margin is the amount of your own money backing the trade. It's <em>not</em> the full value of the position — it's collateral. If the trade goes well, you keep your margin back plus profit. If it goes badly enough, you lose the margin — nothing more (that's the entire point of futures: your downside is capped at what you put up).</p>
+        <h3>Leverage: multiplying your exposure</h3>
+        <p>Leverage decides how much position your margin controls.</p>
+        <p class="formula">Position Size = (Margin × Leverage) ÷ Entry Price</p>
+        <p>Example: $100 margin at 10x leverage on BTC at $80,000 → $1,000 of exposure → 0.0125 BTC. If BTC rises 5%, that 0.0125 BTC gained $50 — a 50% return on your $100 margin. Fall 5%, and you lose $50 of your $100. <strong>Leverage scales both directions equally.</strong></p>
+        <p class="callout">In this app: set your margin and drag the Leverage slider in the order ticket — the "Position Size" and "Required Margin" fields update live so you can see the effect before you submit.</p>
+      </div>
+
+      <div class="modal-tab-content" data-learn-content="liquidation">
+        <h3>What liquidation actually is</h3>
+        <p>Liquidation is the price at which your losses have eaten through your entire margin. At that point the exchange (or in this app, the simulator) force-closes your position automatically — you don't get a choice, and you don't get any margin back.</p>
+        <p class="formula">Long Liq. Price = Entry × (1 − 1/Leverage + MMR)<br>Short Liq. Price = Entry × (1 + 1/Leverage − MMR)</p>
+        <p>MMR is the <strong>maintenance margin rate</strong> — a small buffer (0.5%–1% depending on the asset here) the exchange keeps so it can close you out before your account goes negative.</p>
+        <h3>The core relationship to understand</h3>
+        <p>Higher leverage pushes your liquidation price <strong>closer</strong> to your entry price. At 2x leverage, price needs to move roughly 50% against you to get liquidated. At 50x, it only needs to move about 2%. This is the single most common way beginners blow up an account — not being wrong about direction, but using leverage so high that normal price noise liquidates them before they're proven right.</p>
+        <p class="callout">In this app: the order ticket shows "Est. Liquidation Price" live before you submit, and every open position shows its own liquidation price in the Positions tab. Watch how much it moves when you drag the leverage slider.</p>
+      </div>
+
+      <div class="modal-tab-content" data-learn-content="orders">
+        <h3>Market orders</h3>
+        <p>Fills immediately at the current price. Use this when you want in <em>now</em> and don't care about getting the exact price to the cent.</p>
+        <h3>Limit orders</h3>
+        <p>You set the exact price you want to enter at, and the order only fills if the market reaches it. A Long limit order fills when price drops <em>to or below</em> your limit; a Short limit order fills when price rises <em>to or above</em> it. Until then, it just sits in "Open Orders" doing nothing.</p>
+        <p class="callout">In this app: toggle Market/Limit at the top of the order ticket. A pending limit order reserves your margin immediately (you'll see your Available Balance drop) even though no position exists yet — cancel it from the "Open Orders" tab to get that margin back.</p>
+      </div>
+
+      <div class="modal-tab-content" data-learn-content="quickstart">
+        <h3>Your first trade, step by step</h3>
+        <ol>
+          <li>Pick a market from the symbol chips at the top (BTC/USD is the most liquid, good for a first trade).</li>
+          <li>In the order ticket, leave it on <strong>Market</strong> and <strong>Long</strong> for simplicity.</li>
+          <li>Set <strong>Margin to Commit</strong> low — try $100. This caps your maximum possible loss on this trade at $100.</li>
+          <li>Start with <strong>Leverage at 5x or lower</strong>. Watch the "Est. Liquidation Price" — notice how far it is from the current price.</li>
+          <li>Click <strong>Open Long Position</strong>. It appears instantly in the Positions tab.</li>
+          <li>Watch the <strong>Unrealized PnL</strong> column move as the live price ticks. This is your trade working in real time.</li>
+          <li>Click <strong>Close</strong> whenever you want to lock in the result — realized PnL moves to your Account panel and the trade lands in History.</li>
+        </ol>
+        <p class="callout">Made a mistake, want a clean slate, or just want to try a different strategy from scratch? <strong>Reset Account</strong> in the top bar restores your $100,000 balance and clears everything.</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="toast-stack" id="toastStack"></div>
