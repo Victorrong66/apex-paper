@@ -519,8 +519,8 @@ function setSide(side){
 /* ---------------- Learn modal ---------------- */
 function initLearnModal(){
   const overlay = document.getElementById("learnOverlay");
-  const open = () => overlay.classList.add("open");
-  const close = () => overlay.classList.remove("open");
+  const open = () => { overlay.classList.add("open"); document.body.classList.add("modal-locked"); };
+  const close = () => { overlay.classList.remove("open"); document.body.classList.remove("modal-locked"); };
 
   document.getElementById("learnBtn").onclick = open;
   document.getElementById("learnClose").onclick = close;

@@ -207,6 +207,8 @@
         <button class="modal-tab" data-learn-tab="liquidation">4. Liquidation</button>
         <button class="modal-tab" data-learn-tab="orders">5. Order Types</button>
         <button class="modal-tab" data-learn-tab="quickstart">6. Quick Start</button>
+        <button class="modal-tab" data-learn-tab="example">7. Worked Example</button>
+        <button class="modal-tab" data-learn-tab="lookfor">8. What To Look For</button>
       </div>
 
       <div class="modal-tab-content active" data-learn-content="basics">
@@ -272,6 +274,63 @@
           <li>Click <strong>Close</strong> whenever you want to lock in the result — realized PnL moves to your Account panel and the trade lands in History.</li>
         </ol>
         <p class="callout">Made a mistake, want a clean slate, or just want to try a different strategy from scratch? <strong>Reset Account</strong> in the top bar restores your $100,000 balance and clears everything.</p>
+      </div>
+
+      <div class="modal-tab-content" data-learn-content="example">
+        <h3>Same trade, two outcomes</h3>
+        <p>Both scenarios below start identically: <strong>$500 margin, Long, 10x leverage, entry at $80,000</strong> → position size = ($500 × 10) ÷ $80,000 = <strong>0.0625 BTC</strong> of exposure. At 10x with Kraken's 0.5% maintenance margin rate on BTC, the liquidation price sits at $80,000 × (1 − 1/10 + 0.005) = <strong>$72,400</strong> — a 9.5% drop.</p>
+
+        <svg class="sim-diagram" viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg">
+          <line x1="40" y1="20" x2="40" y2="230" stroke="#252b38" stroke-width="1"/>
+          <line x1="40" y1="230" x2="620" y2="230" stroke="#252b38" stroke-width="1"/>
+
+          <line x1="40" y1="140" x2="620" y2="140" stroke="#6b7386" stroke-width="1" stroke-dasharray="4 4"/>
+          <text x="625" y="144" fill="#6b7386" font-size="11" font-family="JetBrains Mono">Entry $80,000</text>
+
+          <line x1="40" y1="205" x2="620" y2="205" stroke="#f6465d" stroke-width="1" stroke-dasharray="4 4"/>
+          <text x="625" y="209" fill="#f6465d" font-size="11" font-family="JetBrains Mono">Liq. $72,400</text>
+
+          <circle cx="120" cy="140" r="4" fill="#5b8cff"/>
+          <text x="112" y="124" fill="#aab2c5" font-size="11" font-family="Inter" text-anchor="middle">Entry</text>
+
+          <path d="M 120 140 C 220 125, 260 95, 340 85" fill="none" stroke="#16c784" stroke-width="2.5"/>
+          <circle cx="340" cy="85" r="4" fill="#16c784"/>
+          <text x="340" y="68" fill="#16c784" font-size="12" font-weight="700" font-family="JetBrains Mono" text-anchor="middle">+$125 (+25%)</text>
+          <text x="340" y="100" fill="#6b7386" font-size="10" font-family="Inter" text-anchor="middle">price +2.5% → close</text>
+
+          <path d="M 120 140 C 220 160, 260 190, 320 205" fill="none" stroke="#f6465d" stroke-width="2.5"/>
+          <circle cx="320" cy="205" r="4" fill="#f6465d"/>
+          <text x="320" y="226" fill="#f6465d" font-size="12" font-weight="700" font-family="JetBrains Mono" text-anchor="middle">−$500 (−100%)</text>
+          <text x="320" y="245" fill="#6b7386" font-size="10" font-family="Inter" text-anchor="middle">price −9.5% → liquidated</text>
+        </svg>
+
+        <h3>Reading it</h3>
+        <ul>
+          <li><strong>Green path:</strong> price rises 2.5%, to $82,000. PnL = ($82,000 − $80,000) × 0.0625 = <strong>+$125</strong> — a 25% gain on your $500 margin, because 10x leverage multiplies the 2.5% move into a 25% account swing.</li>
+          <li><strong>Red path:</strong> price falls 9.5%, to $72,400 — your liquidation price. The position auto-closes and you lose the <strong>entire $500 margin</strong>, no more and no less. Notice the move needed to wipe you out (9.5%) is much smaller than the move that got you a 25% gain would suggest it "should" be — that asymmetry is exactly what higher leverage does to your risk.</li>
+          <li>Same leverage, same entry, same position size — the only variable is which way price moved and by how much. This is why section 4 (Liquidation) matters more than which direction you guess right.</li>
+        </ul>
+        <p class="callout">Try reproducing this yourself: open a real position in this app with $500 margin at 10x, then watch the Positions tab — your live liquidation price and unrealized PnL will track exactly this math as the real market moves.</p>
+      </div>
+
+      <div class="modal-tab-content" data-learn-content="lookfor">
+        <h3>Reading the chart in general</h3>
+        <ul>
+          <li><strong>Trend direction:</strong> a series of higher highs and higher lows is an uptrend; lower highs and lower lows is a downtrend. Trading with the trend is lower-risk than trying to catch a reversal.</li>
+          <li><strong>Volatility:</strong> long candle bodies and wide high-low ranges mean price is moving fast — that's exactly when high leverage gets dangerous, because normal noise can reach your liquidation price.</li>
+          <li><strong>Support and resistance:</strong> price levels where it has reversed before tend to matter again — watch how price reacts the next time it approaches one.</li>
+          <li><strong>Volume confirms moves:</strong> a big price move on high volume is more likely to continue than the same move on low volume.</li>
+        </ul>
+        <h3>What to check in this app specifically, before every trade</h3>
+        <ul>
+          <li><strong>24h High / Low</strong> (price strip, top of chart): tells you where current price sits in its recent range — near the high, near the low, or in the middle.</li>
+          <li><strong>24h Change %</strong> (next to the price): green/red momentum context for the last 24 hours — is this symbol already up or down a lot today?</li>
+          <li><strong>24h Volume</strong>: a sudden spike relative to what you've seen on that symbol usually means something is actively happening, not quiet drift.</li>
+          <li><strong>Est. Liquidation Price vs. current price</strong> (order ticket, before you submit): the single most important number on this screen. If it's uncomfortably close to the current price, lower your leverage before you click submit, not after.</li>
+          <li><strong>Unrealized PnL column</strong> (Positions tab): once you're in a trade, this is your live scoreboard — don't just stare at the chart, watch this number.</li>
+          <li><strong>Connection dot</strong> (top bar): confirm it's green/"Live" before trusting any price you see — a stale "Reconnecting…" feed showing an old price is worse than no price.</li>
+        </ul>
+        <p class="callout">None of this is a signal to buy or sell — it's what to glance at before and during a trade so your leverage and position size match what the market is actually doing, not what you assumed it was doing.</p>
       </div>
     </div>
   </div>
