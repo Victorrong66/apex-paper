@@ -1,0 +1,14 @@
+{
+  "name": "apex-paper",
+  "version": "1.0.0",
+  "description": "Free local futures paper trading simulator with live Kraken Futures market data.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  }
+}

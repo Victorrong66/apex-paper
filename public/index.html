@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Paper — Futures Trading Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">◆</span>
+      <span class="brand-name">Apex<span class="brand-accent">Paper</span></span>
+    </div>
+
+    <div class="symbol-picker" id="symbolPicker">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="topbar-right">
+      <div class="conn-status" id="connStatus">
+        <span class="dot" id="connDot"></span>
+        <span id="connLabel">Connecting…</span>
+      </div>
+      <button class="btn btn-ghost" id="resetBtn" title="Reset paper account">Reset Account</button>
+    </div>
+  </header>
+
+  <!-- MAIN GRID -->
+  <main class="main-grid">
+
+    <!-- CHART COLUMN -->
+    <section class="chart-col">
+      <div class="price-strip">
+        <div class="price-main">
+          <span class="price-symbol" id="activeSymbolLabel">BTCUSDT</span>
+          <span class="price-value" id="lastPrice">—</span>
+          <span class="price-change" id="priceChange">—</span>
+        </div>
+        <div class="price-stats">
+          <div class="stat"><label>24h High</label><span id="stat24hHigh">—</span></div>
+          <div class="stat"><label>24h Low</label><span id="stat24hLow">—</span></div>
+          <div class="stat"><label>24h Volume</label><span id="stat24hVol">—</span></div>
+          <div class="stat"><label>Mark Price</label><span id="statMark">—</span></div>
+        </div>
+      </div>
+
+      <div class="interval-row" id="intervalRow"></div>
+
+      <div class="chart-wrap">
+        <div id="chart"></div>
+        <div class="chart-loading" id="chartLoading">Loading chart…</div>
+      </div>
+
+      <!-- POSITIONS / ORDERS / HISTORY -->
+      <div class="panel tabs-panel">
+        <div class="tabs" id="tabs">
+          <button class="tab active" data-tab="positions">Positions <span class="pill" id="posCount">0</span></button>
+          <button class="tab" data-tab="orders">Open Orders <span class="pill" id="orderCount">0</span></button>
+          <button class="tab" data-tab="history">History</button>
+        </div>
+
+        <div class="tab-content active" data-tab-content="positions">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Symbol</th><th>Side</th><th>Size</th><th>Entry</th><th>Mark</th>
+                <th>Leverage</th><th>Liq. Price</th><th>Margin</th><th>Unrealized PnL</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="positionsBody">
+              <tr class="empty-row"><td colspan="10">No open positions yet. Place an order to get started.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tab-content" data-tab-content="orders">
+          <table class="data-table">
+            <thead>
+              <tr><th>Symbol</th><th>Side</th><th>Type</th><th>Size</th><th>Limit Price</th><th>Leverage</th><th></th></tr>
+            </thead>
+            <tbody id="ordersBody">
+              <tr class="empty-row"><td colspan="7">No open orders.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tab-content" data-tab-content="history">
+          <table class="data-table">
+            <thead>
+              <tr><th>Time</th><th>Symbol</th><th>Side</th><th>Size</th><th>Entry</th><th>Exit</th><th>Realized PnL</th><th>Reason</th></tr>
+            </thead>
+            <tbody id="historyBody">
+              <tr class="empty-row"><td colspan="8">No closed trades yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="panel account-panel">
+        <h3>Account</h3>
+        <div class="account-row">
+          <label>Equity</label>
+          <span class="mono" id="acctEquity">$100,000.00</span>
+        </div>
+        <div class="account-row">
+          <label>Available Balance</label>
+          <span class="mono" id="acctBalance">$100,000.00</span>
+        </div>
+        <div class="account-row">
+          <label>Margin Used</label>
+          <span class="mono" id="acctMargin">$0.00</span>
+        </div>
+        <div class="account-row">
+          <label>Unrealized PnL</label>
+          <span class="mono" id="acctUPnl">$0.00</span>
+        </div>
+        <div class="account-row">
+          <label>Realized PnL (all time)</label>
+          <span class="mono" id="acctRPnl">$0.00</span>
+        </div>
+      </div>
+
+      <div class="panel order-panel">
+        <h3>Place Order</h3>
+
+        <div class="side-toggle">
+          <button class="side-btn long active" id="longBtn" data-side="LONG">Long</button>
+          <button class="side-btn short" id="shortBtn" data-side="SHORT">Short</button>
+        </div>
+
+        <div class="order-type-toggle">
+          <button class="type-btn active" data-type="MARKET">Market</button>
+          <button class="type-btn" data-type="LIMIT">Limit</button>
+        </div>
+
+        <div class="field" id="limitPriceField" style="display:none">
+          <label>Limit Price (USDT)</label>
+          <input type="number" id="limitPriceInput" placeholder="0.00" step="0.01">
+        </div>
+
+        <div class="field">
+          <label>Margin to Commit (USDT)</label>
+          <input type="number" id="marginInput" placeholder="100" step="1" value="100">
+          <div class="quick-pct">
+            <button data-pct="0.1">10%</button>
+            <button data-pct="0.25">25%</button>
+            <button data-pct="0.5">50%</button>
+            <button data-pct="1">Max</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Leverage <span id="leverageValue">10x</span></label>
+          <input type="range" id="leverageSlider" min="1" max="50" value="10" step="1">
+        </div>
+
+        <div class="order-summary">
+          <div class="summary-row"><label>Position Size</label><span id="summarySize" class="mono">—</span></div>
+          <div class="summary-row"><label>Est. Entry Price</label><span id="summaryEntry" class="mono">—</span></div>
+          <div class="summary-row"><label>Est. Liquidation Price</label><span id="summaryLiq" class="mono">—</span></div>
+          <div class="summary-row"><label>Required Margin</label><span id="summaryMargin" class="mono">—</span></div>
+        </div>
+
+        <button class="btn btn-submit" id="submitOrderBtn">Open Long Position</button>
+        <p class="disclaimer">Simulated paper trading only. Prices stream live from Kraken Futures public market data. Liquidation uses each symbol's real maintenance-margin rate from Kraken's lowest tier, but not the full tiered schedule for larger positions.</p>
+      </div>
+
+    </aside>
+  </main>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
